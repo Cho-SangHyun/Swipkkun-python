@@ -42,7 +42,7 @@ async def reply_message(message: Message):
 
     user_message = message.message
     rental_post_id, gpt_reply_message = user_interact(user_message, model, df)
-
+    
     if rental_post_id == -1:
         return {
             "recommend_success": False,

@@ -20,11 +20,16 @@ msg_prompt = {
 }
 
 def get_chatgpt_reply(msg):
-    completion = openai.ChatCompletion.create(
+    while True:
+        try:
+            completion = openai.ChatCompletion.create(
                     model="gpt-3.5-turbo",
                     messages=msg
                 )
-    return completion['choices'][0]['message']['content']
+            return completion['choices'][0]['message']['content']
+        except openai.error.RateLimitError:
+            pass
+    
 
 def get_query_sim_top_k(query, model, df, top_k):
     query_encode = model.encode(query)
