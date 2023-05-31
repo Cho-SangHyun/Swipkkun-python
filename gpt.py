@@ -1,12 +1,18 @@
 from sentence_transformers import SentenceTransformer, util
-from starlette.config import Config
+from dotenv import load_dotenv
+# from starlette.config import Config
 import torch
 import openai
 import json
 import copy
+import os
 
-config = Config(".env")
-openai.api_key = config("OPEN_AI_KEY")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(BASE_DIR, ".env"))
+
+# config = Config(".env")
+# openai.api_key = config("OPEN_AI_KEY")
+openai.api_key = str(os.environ.get("OPEN_AI_KEY"))
 
 msg_prompt = {
     '추천받기' : {

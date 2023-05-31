@@ -1,9 +1,16 @@
 from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker
-from starlette.config import Config
+from dotenv import load_dotenv
+# from starlette.config import Config
+import os
 
-config = Config(".env")
-DB_URL = config("DATABASE_URL")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(BASE_DIR, ".env"))
+
+# config = Config(".env")
+# DB_URL = config("DATABASE_URL")
+
+DB_URL = str(os.environ.get("DATABASE_URL"))
 
 
 class EngineConn:
