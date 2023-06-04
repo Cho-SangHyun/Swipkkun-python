@@ -3,11 +3,19 @@ from pydantic import BaseModel
 from gpt import user_interact
 from database import EngineConn
 from models import RentalPost, Member
+from fastapi.middleware.cors import CORSMiddleware
 
 import pandas as pd
 from sentence_transformers import SentenceTransformer, util
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 engine = EngineConn()
 session = engine.sessionmaker()
 
@@ -15,6 +23,11 @@ session = engine.sessionmaker()
 class Message(BaseModel):
     message: str
 
+
+@app.post("/test")
+async def test_message():
+    data = session.query(Member).first()
+    return {"message": data.email}
 
 @app.post("/api/chat/send-message")
 async def reply_message(message: Message):

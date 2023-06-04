@@ -88,4 +88,4 @@ def user_interact(query, model, df, msg_prompt_init=msg_prompt):
         recommend_message = get_chatgpt_reply(intent_data).replace("\n", "").strip()
         return (rental_post_id, recommend_message)
     
-    return (-1, "죄송합니다")
+    return (-1, "죄송합니다, 저희가 도와드릴 수 없는 일입니다 ㅠ")
