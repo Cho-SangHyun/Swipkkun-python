@@ -52,9 +52,9 @@ def set_prompt(intent, query, msg_prompt_init, product_info=None):
         msg = msg_prompt_init['추천받기'] # 시스템 메세지를 가지고오고
         if product_info:
             msg['user'] += f'제품명: {product_info["product_name"]} \n'
-            msg['user'] += f'제품 설명: {product_info["description"]} \n'
+            msg['user'] += f'제품 설명: {product_info["product_content"]} \n'
             msg['user'] += f'대여 시 유의사항: {product_info["precaution"]} \n'
-            msg['user'] += f'하루 대여 가격: {product_info["rental_price"]} \n'
+            msg['user'] += f'하루 대여 가격: {product_info["product_price"]} \n'
     # intent 파악
     else:
         msg = msg_prompt_init['의도파악']
@@ -79,13 +79,13 @@ def user_interact(query, model, df, msg_prompt_init=msg_prompt):
         top_result = get_query_sim_top_k(query, model, df, top_k=1)
         top_index = top_result[1].numpy()
         # 추천하는 상품의 id
-        rental_post_id = json.loads(df.iloc[top_index, :][['rental_post_id']].to_json(orient="records"))[0]["rental_post_id"]
+        product_idx = json.loads(df.iloc[top_index, :][['product_idx']].to_json(orient="records"))[0]["product_idx"]
 
-        product_info = df.iloc[top_index, :][['product_name', 'description', 'precaution', 'rental_price']]
+        product_info = df.iloc[top_index, :][['product_name', 'product_content', 'precaution', 'product_price']]
         product_info = json.loads(product_info.to_json(orient="records"))[0]
 
         intent_data = set_prompt(user_intent, query, msg_prompt_cp, product_info)
         recommend_message = get_chatgpt_reply(intent_data).replace("\n", "").strip()
-        return (rental_post_id, recommend_message)
+        return (product_idx, recommend_message)
     
     return (-1, "죄송합니다, 저희가 도와드릴 수 없는 일입니다 ㅠ")

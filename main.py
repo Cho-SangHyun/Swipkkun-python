@@ -33,48 +33,52 @@ async def test_message():
 async def reply_message(message: Message):
     rental_post_data = session.query(RentalPost).all()
     machined_data = {
-        'rental_post_id': [],
+        'product_idx': [],
         'product_name': [],
-        'description': [],
+        'product_content': [],
         'precaution': [],
-        'rental_price': []
+        'product_price': [],
+        'product_hash_tag': [],
     }
     for data in rental_post_data:
-        machined_data['rental_post_id'].append(data.rental_post_id)
+        machined_data['product_idx'].append(data.product_idx)
         machined_data['product_name'].append(data.product_name)
-        machined_data['description'].append(data.description)
+        machined_data['product_content'].append(data.product_content)
         machined_data['precaution'].append(data.precaution)
-        machined_data['rental_price'].append(data.rental_price)
+        machined_data['product_price'].append(data.product_price)
+        machined_data['product_hash_tag'].append(data.product_hash_tag.replace("#", ""))
 
     df = pd.DataFrame(machined_data)
-    df['feature'] = df['product_name'] + " / " + df['description'] + " / " + df['precaution']
+    df['feature'] = df['product_name'] + " / " + df['product_content'] + " / " + df['precaution'] + " / " + df['product_hash_tag']
     
     model = SentenceTransformer("sentence-transformers/distiluse-base-multilingual-cased-v2")
 
     df['hf_embeddings'] = df['feature'].apply(lambda x : model.encode(x))
 
     user_message = message.message
-    rental_post_id, gpt_reply_message = user_interact(user_message, model, df)
+    product_idx, gpt_reply_message = user_interact(user_message, model, df)
     
-    if rental_post_id == -1:
+    if product_idx == -1:
         return {
             "recommend_success": False,
             "recommend_message": gpt_reply_message 
         }
 
-    recommended_product = session.query(RentalPost).filter(RentalPost.rental_post_id == rental_post_id).first()
+    recommended_product = session.query(RentalPost).filter(RentalPost.product_idx == product_idx).first()
     product_owner = session.query(Member).filter(Member.member_id == recommended_product.member_id).first()
     
     return {
         "recommend_success": True,
         "recommend_message": gpt_reply_message,
         "recommend_product" : {
-            "rental_post_id": recommended_product.rental_post_id,
+            "product_idx": recommended_product.product_idx,
             "product_owner": product_owner.nickname,
             "product_name": recommended_product.product_name,
-            "description": recommended_product.description,
+            "product_content": recommended_product.product_content,
             "precaution": recommended_product.precaution,
-            "rental_price": recommended_product.rental_price
+            "product_price": recommended_product.product_price,
+            "product_hash_tag": recommended_product.product_hash_tag,
+            "product_img": recommended_product.product_img
         }
     }
 
